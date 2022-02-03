@@ -164,7 +164,7 @@ class Window(base.Window, HasListeners):
         else:
             self.core.mapped_windows.remove(self)
         self.core.stack_windows()
-        if hasattr(self, "_idle_inhibitors_count") and self._idle_inhibitors_count > 0:
+        if self._idle_inhibitors_count > 0:
             self.core.check_idle_inhibitor()
 
     def _on_map(self, _listener, _data):
@@ -386,7 +386,7 @@ class Window(base.Window, HasListeners):
         self.borderwidth = width
 
     def add_idle_inhibitor(
-        self, surface: surface.Surface, _x: int, _y: int, inhibitor: IdleInhibitorV1
+        self, surface: surface.Surface, _x: int, _y: int, inhibitor: IdleInhibitorV1 | None
     ) -> None:
         if surface == inhibitor.surface:
             self._idle_inhibitors_count += 1
@@ -785,6 +785,7 @@ class Internal(base.Internal, Window):
     def __init__(self, core: Core, qtile: Qtile, x: int, y: int, width: int, height: int):
         self.core = core
         self.qtile = qtile
+        self._idle_inhibitors_count: int = 0
         self._mapped: bool = False
         self._wid: int = self.core.new_wid()
         self.x: int = x
@@ -905,12 +906,14 @@ class Static(base.Static, Window):
         qtile: Qtile,
         surface: SurfaceType,
         wid: int,
+        idle_inhibitor_count: int = 0,
     ):
         base.Static.__init__(self)
         self.core = core
         self.qtile = qtile
         self.surface = surface
         self.screen = qtile.current_screen
+        self._idle_inhibitors_count = idle_inhibitor_count
         self.subsurfaces: list[SubSurface] = []
         self._wid = wid
         self._mapped: bool = False
