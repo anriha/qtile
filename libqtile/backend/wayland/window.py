@@ -1198,6 +1198,7 @@ class XWindow(Window):
         self.bordercolor: list[ffi.CData] = [_rgb((0, 0, 0, 1))]
         self._opacity: float = 1.0
         self._outputs: set[Output] = set()
+        self._idle_inhibitors_count: int = 0
 
         self._app_id: str | None = self.surface.wm_class
         self.ftm_handle = core.foreign_toplevel_manager_v1.create_handle()
